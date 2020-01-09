@@ -60,7 +60,7 @@ double evaluation(Board &board, int color){
         return eval-eval_enemy;
     }
 }
-int minimax(Board board, int row, int col, int depth, int alpha, int beta, bool maximizingPlayer, char me, char enemy){
+int minimax(double pre_eval, Board board, int row, int col, int depth, int alpha, int beta, bool maximizingPlayer, char me, char enemy){
     int color = (maximizingPlayer==false)?me:enemy;
     
     //Board update
@@ -72,13 +72,13 @@ int minimax(Board board, int row, int col, int depth, int alpha, int beta, bool 
     else if(color=='b')
         board_next.place_orb(row, col, &blue_player);
     else{
-        cout<<"error"<<endl;
+        cout<<"[error]"<<endl;
         return 12345;
     }
 
     double evaluation_of_position = evaluation(board_next, me);
     if (depth == 0 || evaluation_of_position==100 ||evaluation_of_position==0)//eval==100 means game over
-        return evaluation_of_position;
+        return evaluation_of_position-pre_eval;
     
     int flag=0;
     if (maximizingPlayer){
@@ -87,7 +87,7 @@ int minimax(Board board, int row, int col, int depth, int alpha, int beta, bool 
         for(int i=0;i<5;i++){
             for(int j=0;j<6;j++){
                 if(board.get_cell_color(row, col) != me && board.get_cell_color(row, col) != 'w')continue;
-                double eval = minimax(board_next, i, j, (depth - 1), alpha, beta, false, me, enemy);
+                double eval = minimax(evaluation_of_position-pre_eval,board_next, i, j, (depth - 1), alpha, beta, false, me, enemy);
                 maxEval = max(maxEval, eval);
                 alpha = max(alpha, eval);
                 if(beta <= alpha){
@@ -105,7 +105,7 @@ int minimax(Board board, int row, int col, int depth, int alpha, int beta, bool 
         for(int i=0;i<5;i++){
             for(int j=0;j<6;j++){
                 if(board.get_cell_color(row, col) != enemy && board.get_cell_color(row, col) != 'w')continue;
-                double eval = minimax(board_next, i, j, (depth - 1), alpha, beta, true, me, enemy);
+                double eval = minimax(evaluation_of_position-pre_eval,board_next, i, j, (depth - 1), alpha, beta, true, me, enemy);
                 minEval = min(minEval, eval);
                 beta = min(beta, eval);
                 if(beta <= alpha){
@@ -152,7 +152,7 @@ void algorithm_A(Board board, Player player, int index[]){
     for(int row=0;row<5;row++){
         for(int col=0;col<6;col++){
             if(board.get_cell_color(row, col) == color || board.get_cell_color(row, col) == 'w'){
-                double eval=minimax(board, row, col, 0, -10000, 10000, false, me, enemy);
+                double eval=minimax(evaluation(board, me),board, row, col, 0, -10000, 10000, false, me, enemy);
                 if(eval>Max_eval){
                     Max_eval = eval;
                     best_pos.clear();
