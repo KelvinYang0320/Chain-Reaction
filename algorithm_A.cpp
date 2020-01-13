@@ -3,8 +3,6 @@
 #include <time.h>
 #include "../include/algorithm.h"
 
-#include<vector>
-
 using namespace std;
 
 /******************************************************
@@ -26,11 +24,64 @@ using namespace std;
  * 3. The function that return the color fo the cell(row, col)
  * 4. The function that print out the current board statement
 *************************************************************************/
+/*------class vector------*/
+template <class T>
+class  Vector
+{
+public:
+
+    typedef T * iterator;
+
+    Vector(){
+        my_capacity = 0;
+        my_size = 0;
+        buffer = 0;
+    }     
+    ~Vector(){
+        delete[ ] buffer;
+    }
+    unsigned int size() const{return my_size;}
+    bool empty() const;
+    void push_back(const T & v){
+        if (my_size >= my_capacity)
+            reserve(my_capacity +5);
+        buffer [my_size++] = v;
+    }
+    void pop_back(){my_size--;};
+
+    T & operator[](unsigned int index){return buffer[index];}
+    void clear(){
+        my_capacity = 0;
+        my_size = 0;
+        buffer = 0;
+    }
+    bool empty(){return (my_size==0)?1:0;}
+private:
+    unsigned int my_size;
+    unsigned int my_capacity;
+    T * buffer;
+    void reserve(unsigned int capacity){
+        if(buffer == 0)
+        {
+            my_size = 0;
+            my_capacity = 0;
+        }    
+        T * Newbuffer = new T [capacity];
+        unsigned int l_Size = capacity < my_size ? capacity : my_size;
+        for (unsigned int i = 0; i < l_Size; i++)
+            Newbuffer[i] = buffer[i];
+        my_capacity = capacity;
+        delete[] buffer;
+        buffer = Newbuffer;
+    }
+};
+/*------class vector------*/
 
 struct Pair{
     int first;
     int second;
     Pair(int a, int b):first(a),second(b){};
+    Pair():first(0),second(0){};
 };
 int max(double a, double b){
     return (a>b)?a:b;
@@ -122,14 +173,7 @@ int minimax(double pre_eval, Board board, int row, int col, int depth, int alpha
 
 void algorithm_A(Board board, Player player, int index[]){
 
-    // cout << board.get_capacity(0, 0) << endl;
-    // cout << board.get_orbs_num(0, 0) << endl;
-    // cout << board.get_cell_color(0, 0) << endl;
-    // board.print_current_board(0, 0, 0);
-
-    //////////// Random Algorithm ////////////
-    // Here is the random algorithm for your reference, you can delete or comment it.
-    vector<Pair> best_pos;
+    Vector<Pair> best_pos;
     int color = player.get_color();
     //check 4 corner
     if(board.get_cell_color(0, 0) == 'w'){best_pos.push_back(Pair(0,0));}
